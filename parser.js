@@ -5,5 +5,5 @@ const converter = new NodeHtmlMarkdown({
 })
 
 module.exports = (content) => {
-    converter.translate(content)
+    return converter.translate(content)
 }
