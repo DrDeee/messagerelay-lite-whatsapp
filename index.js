@@ -1,7 +1,11 @@
 require('dotenv').config()
 
+const db = require('./db')
+db.load()
+
 const venom = require('venom-bot')
 const Websocket = require('ws').WebSocket
+
 
 const parseHtml = require('./parser')
 
@@ -32,16 +36,32 @@ gateway.onmessage = async(msg) => {
             console.info('Gateway connection verified.')
             break
         case 'create':
+            const content = parseHtml(data.content)
             switch (data.target) {
                 case 'wid':
-                    for (const wid of wids)
-                        waClient.sendText(wid, parseHtml(data.content))
+                    for (const wid of wids) {
+                        const msgId = (await waClient.sendText(wid, content)).to._serialized
+                        db.addMessage(data.id, msgId + '|||' + wid)
+                    }
+                    db.saveAsync()
                     break
                 case 'iaow':
-                    for (const iaow of iaows)
-                        waClient.sendText(iaow, parseHtml(data.content))
+                    for (const iaow of iaows) {
+                        const msgId = (await waClient.sendText(iaow, content)).to._serialized
+                        db.addMessage(data.id, msgId + '|||' + iaow)
+                    }
+                    db.saveAsync()
                     break
             }
+            break
+        case 'delete':
+            const msgs = db.getMessages(data.id)
+            for (const msg of msgs) {
+                const parts = msg.split('|||')
+                waClient.deleteMessage(parts[1], [parts[0]]).catch(e => console.log('Error hile deleting message', e))
+            }
+            db.removeMessages(data.id)
+            db.saveAsync()
 
     }
 }
@@ -50,26 +70,15 @@ venom
     .create()
     .then((client) => start(client))
     .catch((erro) => {
-        console.log(erro);
+        process.exit()
     });
 
 async function start(client) {
     waClient = client
-    client.onMessage((message) => {
-        if (message.body === 'Hi' && message.isGroupMsg === false) {
-            client
-                .sendText(message.from, 'Welcome Venom 🕷')
-                .then((result) => {
-                    console.log('Result: ', result)
-                })
-                .catch((erro) => {
-                    console.error('Error when sending: ', erro)
-                })
-        }
-    })
 }
 
 const close = () => {
+    db.save()
     client.close()
 }
 
