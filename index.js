@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config({ path: './process.env' })
 
 const db = require('./db')
 db.load()
