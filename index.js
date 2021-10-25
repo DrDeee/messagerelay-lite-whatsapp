@@ -74,6 +74,12 @@ venom
     });
 
 async function start(client) {
+    console.log('============')
+    for (const chat of await client.getAllChats()) {
+        if (chat.name == undefined) continue
+        console.log(chat.name, chat.id._serialized)
+    }
+    console.log('============')
     waClient = client
 }
 
