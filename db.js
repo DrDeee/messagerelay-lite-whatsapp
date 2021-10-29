@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-let db = {}
+let db
 module.exports = {
     load() {
         console.info('Loading database..')
@@ -11,7 +11,10 @@ module.exports = {
             db = JSON.parse(file)
         } catch (e) {
             console.error('Error while loading database', e)
-            db = {}
+            db = {
+                msgs: {},
+                mirror: {}
+            }
             this.save()
         }
         console.info('Database loaded.')
@@ -41,14 +44,36 @@ module.exports = {
     },
 
     getMessages(id) {
-        const msgs = db[id]
+        const msgs = db.msgs[id]
         return msgs ? msgs : []
     },
     addMessage(id, msgId) {
-        if (!db[id]) db[id] = []
-        db[id].push(msgId)
+        if (!db.msgs[id]) db.msgs[id] = []
+        db.msgs[id].push(msgId)
     },
     removeMessages(id) {
-        delete db[id]
+        delete db.msgs[id]
+    },
+    addMirror(waId, msgId) {
+        db.mirror[waId] = msgId
+    },
+
+    getMirrorById(id) {
+        for (const waId in db.mirror) {
+            if (db.mirror[waId] === id)
+                return waId
+        }
+        return null
+    },
+
+    getMirrorByWaId(waId) {
+        return db.mirror[waId] ? db.mirror[waId] : null
+    },
+
+    deleteMirror(msgId) {
+        for (const waId in db.mirror) {
+            if (msgId === db.mirror[waId])
+                delete db.mirror[waId]
+        }
     }
 }

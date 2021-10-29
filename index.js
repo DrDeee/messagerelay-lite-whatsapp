@@ -6,8 +6,7 @@ db.load()
 const venom = require('venom-bot')
 const Websocket = require('ws').WebSocket
 
-
-const parseHtml = require('./parser')
+const parser = require('./parser')
 
 const apiToken = process.env.API_TOKEN
 const gateway = new Websocket('wss://' + process.env.API_ORIGIN + '/api/v1/gateway/backend')
@@ -36,7 +35,7 @@ gateway.onmessage = async(msg) => {
             console.info('Gateway connection verified.')
             break
         case 'create':
-            const content = parseHtml(data.content)
+            const content = parser.HTMLToWhatsapp(data.content)
             switch (data.target) {
                 case 'wid':
                     for (const wid of wids) {
@@ -68,25 +67,26 @@ gateway.onmessage = async(msg) => {
 
 venom
     .create()
-    .then((client) => start(client))
+    .then(async(client) => start(client))
     .catch((erro) => {
+        console.error(erro)
         process.exit()
     });
 
 async function start(client) {
+    waClient = client
+    require('./handler')(client)
     console.log('============')
     for (const chat of await client.getAllChats()) {
         if (chat.name == undefined) continue
         console.log(chat.name, chat.id._serialized)
     }
     console.log('============')
-    waClient = client
 }
 
 const close = () => {
     db.save()
-    client.close()
+    waClient.close()
 }
 
-process.on('SIGINT', close)
-process.on('SIGTERM', close)
+process.on('exit', close)

@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/drdeee/messagerelay-lite-whatsapp#readme",
   "dependencies": {
+    "axios": "^0.24.0",
     "dotenv": "^10.0.0",
     "node-html-markdown": "^1.1.2",
+    "openid-client": "^5.0.1",
     "venom-bot": "^3.1.8",
     "ws": "^8.2.3"
   }
