@@ -85,8 +85,7 @@ async function start(client) {
 
 const close = () => {
     db.save()
-    client.close()
+    waClient.close()
 }
 
-process.on('SIGINT', close)
-process.on('SIGTERM', close)
+process.on('exit', close)
