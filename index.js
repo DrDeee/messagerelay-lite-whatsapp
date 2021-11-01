@@ -88,4 +88,5 @@ const close = () => {
     waClient.close()
 }
 
+process.on('SIGINT', close)
 process.on('exit', close)
