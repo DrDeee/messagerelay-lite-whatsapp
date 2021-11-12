@@ -1,4 +1,5 @@
-## run in Docker
+# Project archived: will be rewritten in Go
+## Run in Docker
 
 1. Create a new folder and open it.
 2. Clone the repository with `git clone`.
